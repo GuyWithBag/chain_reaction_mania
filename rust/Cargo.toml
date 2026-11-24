@@ -8,3 +8,10 @@ crate-type = ["cdylib"]
 
 [dependencies]
 godot = "0.5.6"
+
+[dependencies.uuid]
+version = "1.29.3"
+# Lets you generate random UUIDs
+features = [
+    "v4",
+]

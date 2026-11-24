@@ -5,4 +5,8 @@ struct MyExtension;
 #[gdextension]
 unsafe impl ExtensionLibrary for MyExtension {}
 
-mod player;
+mod board;
+mod board_actions;
+mod board_cell;
+mod board_events;
+mod neutron;
