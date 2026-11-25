@@ -57,6 +57,5 @@ pub(crate) impl INode for Game {
         board.print(true);
 
         BoardActions::add_neutron(&mut board, Vector2i { x: 2, y: 2 });
-        board.print(true);
     }
 }

@@ -18,6 +18,7 @@ pub(crate) struct Board {
     pub id: Uuid,
     pub reaction_queue_of_cell_positions: Vec<Vector2i>,
     pub unresolved_reaction_queue_of_cell_positions: Vec<Vector2i>,
+    // pub reaction_queue: Vec<Vector2i>,
 }
 
 #[godot_api]
@@ -170,5 +171,24 @@ pub(crate) impl Board {
         }
 
         godot_print!("Total cells: {}", self.cells.len());
+        godot_print!("Total Neutrons: {}", self.neutrons.len());
+    }
+
+    #[func]
+    pub(crate) fn print_reaction_queue(&self) {
+        godot_print!("Reaction queue:");
+
+        for position in &self.reaction_queue_of_cell_positions {
+            godot_print!("({}, {})", position.x, position.y);
+        }
+    }
+
+    #[func]
+    pub(crate) fn print_unresolved_reaction_queue(&self) {
+        godot_print!("Unresolved reaction queue:");
+
+        for position in &self.unresolved_reaction_queue_of_cell_positions {
+            godot_print!("({}, {})", position.x, position.y);
+        }
     }
 }

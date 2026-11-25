@@ -1,10 +1,32 @@
 [gd_scene format=3 uid="uid://d2xo67eix0wus"]
 
+[ext_resource type="Script" uid="uid://d4a7dnhjdd1pu" path="res://button.gd" id="1_j2q8x"]
+[ext_resource type="Script" uid="uid://cieocmn2cdxtu" path="res://button_2.gd" id="2_112p8"]
+
 [sub_resource type="TileSet" id="TileSet_tkmgc"]
 
 [node name="Node" type="Node" unique_id=1624890289]
+
+[node name="Button" type="Button" parent="." unique_id=1407137446]
+offset_left = 17.0
+offset_top = 32.0
+offset_right = 143.0
+offset_bottom = 63.0
+text = "Print Reactions"
+script = ExtResource("1_j2q8x")
+
+[node name="Button2" type="Button" parent="." unique_id=955814585]
+offset_left = 190.0
+offset_top = 35.0
+offset_right = 408.0
+offset_bottom = 66.0
+text = "Print Unresolved Reactions"
+script = ExtResource("2_112p8")
 
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=480048532]
 tile_set = SubResource("TileSet_tkmgc")
 
 [node name="Game" type="Game" parent="." unique_id=2015946658]
+
+[connection signal="pressed" from="Button" to="Button" method="_on_pressed"]
+[connection signal="pressed" from="Button2" to="Button2" method="_on_pressed"]

@@ -25,7 +25,18 @@ impl BoardActions {
         };
 
         if should_disperse {
-            Self::disperse(board, &position);
+            // Self::disperse(board, &position);
+            board.reaction_queue_of_cell_positions.push(position);
+            Self::disperse_queue(board);
+            Self::disperse_unresolved_reactions_queue(board);
+            Self::disperse_queue(board);
+            Self::disperse_unresolved_reactions_queue(board);
+            Self::disperse_queue(board);
+            Self::disperse_unresolved_reactions_queue(board);
+            Self::disperse_queue(board);
+            Self::disperse_unresolved_reactions_queue(board);
+            Self::disperse_queue(board);
+            Self::disperse_unresolved_reactions_queue(board);
             // Self::chain_react(board);
         }
     }
@@ -60,8 +71,14 @@ impl BoardActions {
                         .push(neighbor_position);
                 } else {
                     neighbor_cell.neutron_ids.push(initial_neutron_id);
-                    // If the cell now has 4 neutrons, then add to queue.
-                    if neighbor_cell.neutron_ids.len() >= neighbor_cell.max_neutrons {
+                    // If the cell now has 4 neutrons after pushing, then add to queue.
+                    let neighbor_cell_neutrons = neighbor_cell.neutron_ids.len();
+                    let neighbor_cell_max_neutrons = neighbor_cell.max_neutrons;
+                    board.print_reaction_queue();
+                    if neighbor_cell_neutrons == neighbor_cell_max_neutrons {
+                        godot_print!(
+                            "Pushed '{neighbor_position}' because neighbor cell '{neighbor_position}' is {neighbor_cell_neutrons} >= {neighbor_cell_max_neutrons} "
+                        );
                         board
                             .reaction_queue_of_cell_positions
                             .push(neighbor_position);
@@ -82,31 +99,52 @@ impl BoardActions {
         }
 
         board.print(true);
+        // board.print_reaction_queue();
+        // board.print_unresolved_reaction_queue();
         // Chain react?
-        Self::chain_react(board);
+        // Self::chain_react(board);
     }
 
     fn disperse_queue(board: &mut Board) {
+        board.print_reaction_queue();
+
         let reaction_queue = take(&mut board.reaction_queue_of_cell_positions);
+        // let reaction_queue = &mut board.reaction_queue_of_cell_positions.to_owned();
 
         for cell_position in reaction_queue {
             // let cell = board.cells.get_mut(cell_position);
             Self::disperse(board, &cell_position);
         }
+
+        // board.reaction_queue_of_cell_positions.clear();
     }
 
     fn disperse_unresolved_reactions_queue(board: &mut Board) {
+        board.print_unresolved_reaction_queue();
+
         let unresolved_reaction_queue =
             take(&mut board.unresolved_reaction_queue_of_cell_positions);
+        // let unresolved_reaction_queue =
+        //     &mut board.unresolved_reaction_queue_of_cell_positions.to_owned();
 
         for cell_position in unresolved_reaction_queue {
             // let cell = board.cells.get_mut(cell_position);
             Self::disperse(board, &cell_position);
         }
+
+        // board.unresolved_reaction_queue_of_cell_positions.clear();
     }
 
     fn chain_react(board: &mut Board) {
         Self::disperse_queue(board);
         Self::disperse_unresolved_reactions_queue(board);
+
+        if board.reaction_queue_of_cell_positions.is_empty()
+            && board.unresolved_reaction_queue_of_cell_positions.is_empty()
+        {
+            return;
+        }
+
+        Self::chain_react(board);
     }
 }
