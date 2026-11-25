@@ -1,6 +1,10 @@
 use std::mem::take;
 
-use crate::{board::Board, neutron::Neutron};
+use crate::{
+    board::Board,
+    board_events::{EventType, GameManager},
+    neutron::Neutron,
+};
 use godot::prelude::*;
 
 pub(crate) struct BoardActions;
@@ -11,8 +15,14 @@ impl BoardActions {
             return;
         }
 
-        let id = board.neutrons.len();
-        board.neutrons.insert(id, Neutron { position, id });
+        let neutron_id = board.neutrons.len();
+        board.neutrons.insert(
+            neutron_id,
+            Neutron {
+                position,
+                id: neutron_id,
+            },
+        );
 
         let should_disperse = {
             let cell = board
@@ -20,24 +30,20 @@ impl BoardActions {
                 .get_mut(&position)
                 .expect("cell was checked before inserting the neutron");
 
-            cell.neutron_ids.push(id);
+            cell.neutron_ids.push(neutron_id);
             cell.neutron_ids.len() >= cell.max_neutrons
         };
 
         if should_disperse {
             // Self::disperse(board, &position);
             board.reaction_queue_of_cell_positions.push(position);
-            Self::disperse_queue(board);
-            Self::disperse_unresolved_reactions_queue(board);
-            Self::disperse_queue(board);
-            Self::disperse_unresolved_reactions_queue(board);
-            Self::disperse_queue(board);
-            Self::disperse_unresolved_reactions_queue(board);
-            Self::disperse_queue(board);
-            Self::disperse_unresolved_reactions_queue(board);
-            Self::disperse_queue(board);
-            Self::disperse_unresolved_reactions_queue(board);
-            // Self::chain_react(board);
+            GameManager::singleton()
+                .bind_mut()
+                .log(EventType::AddNeutron {
+                    id: neutron_id,
+                    position,
+                });
+            Self::chain_react(board);
         }
     }
 
@@ -49,6 +55,15 @@ impl BoardActions {
 
         let neighbor_positions =
             board.get_neighboring_cells_positions(initial_position, 0, ending_cell);
+
+        if let Some(initial_cell) = board.cells.get_mut(initial_position) {
+            if initial_cell.neutron_ids.len() != initial_cell.max_neutrons {
+                // board
+                //     .reaction_queue_of_cell_positions
+                //     .retain(|item| item != initial_position);
+                return;
+            }
+        }
 
         for neighbor_position in neighbor_positions {
             // Moving the neutrons to the neighbores: By removing the initial neutrons.
@@ -69,12 +84,17 @@ impl BoardActions {
                     board
                         .unresolved_reaction_queue_of_cell_positions
                         .push(neighbor_position);
+
+                    // if that neighbor cell which now has unresolved neutrons, has neutrons from unresolved neutrons, then remove it.
+                    // neighbor_cell
+                    //     .neutron_ids
+                    //     .retain(|neutron_id| *neutron_id != initial_neutron_id);
                 } else {
                     neighbor_cell.neutron_ids.push(initial_neutron_id);
                     // If the cell now has 4 neutrons after pushing, then add to queue.
                     let neighbor_cell_neutrons = neighbor_cell.neutron_ids.len();
                     let neighbor_cell_max_neutrons = neighbor_cell.max_neutrons;
-                    board.print_reaction_queue();
+                    // board.print_reaction_queue();
                     if neighbor_cell_neutrons == neighbor_cell_max_neutrons {
                         godot_print!(
                             "Pushed '{neighbor_position}' because neighbor cell '{neighbor_position}' is {neighbor_cell_neutrons} >= {neighbor_cell_max_neutrons} "
@@ -83,6 +103,13 @@ impl BoardActions {
                             .reaction_queue_of_cell_positions
                             .push(neighbor_position);
                     }
+                    GameManager::singleton()
+                        .bind_mut()
+                        .log(EventType::Reaction {
+                            happened_to: neighbor_position,
+                            happened_from: *initial_position,
+                            neutron_id: initial_neutron_id,
+                        });
                 }
             }
             // Updating existing neutron only. (Should be)
