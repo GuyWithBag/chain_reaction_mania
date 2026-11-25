@@ -81,6 +81,7 @@ impl BoardActions {
                 .append(&mut initial_cell.unresolved_neutrons_ids);
         }
 
+        board.print(true);
         // Chain react?
         Self::chain_react(board);
     }

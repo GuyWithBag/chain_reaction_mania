@@ -1,16 +1,10 @@
 [gd_scene format=3 uid="uid://d2xo67eix0wus"]
 
-[ext_resource type="Texture2D" uid="uid://c8j6s8ijspnnu" path="res://icon.svg" id="1_sy5k4"]
-
 [sub_resource type="TileSet" id="TileSet_tkmgc"]
 
 [node name="Node" type="Node" unique_id=1624890289]
 
-[node name="Player" type="Player" parent="." unique_id=1466156034]
-texture = ExtResource("1_sy5k4")
-
 [node name="TileMapLayer" type="TileMapLayer" parent="." unique_id=480048532]
 tile_set = SubResource("TileSet_tkmgc")
 
-[node name="Board" type="Board" parent="." unique_id=391857251]
-map_size = Vector2i(2, 2)
+[node name="Game" type="Game" parent="." unique_id=2015946658]

@@ -35,15 +35,15 @@ pub(crate) impl INode for Board {
     }
 
     fn ready(&mut self) {
-        let ending_cell = Vector2i {
-            x: self.map_size.x - 1,
-            y: self.map_size.y - 1,
-        };
-        let wall_positions = HashSet::from([Vector2i { x: 2, y: 2 }]);
+        // let ending_cell = Vector2i {
+        //     x: self.map_size.x - 1,
+        //     y: self.map_size.y - 1,
+        // };
 
         self.cells = self.create_cells(self.map_size);
-        self.apply_walls(wall_positions, ending_cell);
-        self.print_board();
+        // let wall_positions = HashSet::from([Vector2i { x: 2, y: 2 }]);
+        // self.apply_walls(wall_positions, ending_cell);
+        // self.print();
     }
 }
 
@@ -144,8 +144,8 @@ pub(crate) impl Board {
         }
     }
 
-    fn print_board(&self) {
-        godot_print!("Final board:");
+    pub(crate) fn print(&self, print_details: bool) {
+        godot_print!("Printing Board:");
 
         for y in 0..self.map_size.y {
             let mut row = String::new();
@@ -154,6 +154,13 @@ pub(crate) impl Board {
                 let position = Vector2i { x, y };
 
                 match self.cells.get(&position) {
+                    Some(cell) if print_details => {
+                        if cell.neutron_ids.is_empty() {
+                            row.push_str(". ");
+                        } else {
+                            row.push_str(&format!("{} ", cell.neutron_ids.len(),));
+                        }
+                    }
                     Some(cell) => row.push_str(&format!("{} ", cell.max_neutrons)),
                     None => row.push_str(". "),
                 }
